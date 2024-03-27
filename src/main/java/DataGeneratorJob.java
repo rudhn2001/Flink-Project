@@ -75,15 +75,15 @@ public class DataGeneratorJob {
                                 DataStream<String> userdataStream = env
                                 .fromSource(userdataSource, WatermarkStrategy.noWatermarks(), "userdata_source");
                                 
-                // KafkaRecordSerializationSchema<String> userdataSerializer = KafkaRecordSerializationSchema
-                //                 .<String>builder()
-                //                 .setTopic("userdata")
-                //                 .setValueSerializationSchema(new JsonSerializationSchema<String>(DataGeneratorJob::getMapper))
-                //                 .build();
+                KafkaRecordSerializationSchema<String> userdataSerializer = KafkaRecordSerializationSchema
+                                .<String>builder()
+                                .setTopic("userdata1")
+                                .setValueSerializationSchema(new JsonSerializationSchema<String>(DataGeneratorJob::getMapper))
+                                .build();
 
                 KafkaSink<String> userdataSink = KafkaSink.<String>builder()
                                 .setKafkaProducerConfig(producerConfig)
-                                // .setRecordSerializer(userdataSerializer)
+                                .setRecordSerializer(userdataSerializer)
                                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                                 .build();
 

@@ -1,6 +1,7 @@
 {
   "key" : "/client/ip",
   "fields": [
+    "/client/apples",
     "/client/ip",
     "/request/path",
     "/request/method",

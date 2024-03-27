@@ -1,8 +1,10 @@
-fields:
-  - path
-  - method
-  - status
+Key - '{{/response/status}}'
+Value  '{"specversion": "1.0", "source": "{{/client/ip}}", "request": "{{/request}}", "response": "{{/response}}"}'
 
-staticFields:
-  specVersion: "1.0.0"
-  Version: "5.0.0"
+Key - '{{/client/ip}}'
+Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "status": "{{/response/status}}", "apples": "{{/response/apples}}"}'
+
+{"path": "{{ request.path }}", "method": "{{ request.method }}", "status": "{{ response.status }}"}
+
+Key - '{{/client/ip}}'
+Value - '{"path": "{{request/path}}", "method": "{{request/method}}", "status": "{{response/status}}"}'
