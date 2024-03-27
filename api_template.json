@@ -1,0 +1,14 @@
+{
+  "key" : "/client/ip",
+  "fields": [
+    "/client/ip",
+    "/request/path",
+    "/request/method",
+    "/response/status"
+    
+  ],
+  "staticFields" : {
+    "specVersion": "1.0.0",
+    "Version": "5.0.0"
+  }
+}

@@ -1,0 +1,32 @@
+    for (String fieldName : fields) {
+        String fieldValue = null;
+        Iterator<String> fieldIterator = Arrays.asList(fieldName.split("/")).iterator();
+        JsonNode currentNode = jsonNode;
+        while (fieldIterator.hasNext()) {
+            String currentFieldName = fieldIterator.next();
+            if (currentNode.has(currentFieldName)) {
+                if (!fieldIterator.hasNext()) {
+                    fieldValue = currentNode.get(currentFieldName).asText();
+                } else {
+                    currentNode = currentNode.get(currentFieldName);
+                }
+            } else {
+                break;
+            }
+        }
+        if (fieldValue != null) {
+            processedDataBuilder.append(fieldName).append(": ").append(fieldValue).append("\n");
+        } else {
+            // Handle missing field value (optional)
+            processedDataBuilder.append(fieldName).append(": ").append("MISSING").append("\n");
+            flag.set(true);
+        }
+    }
+
+    // Process static fields
+    for (Map.Entry<String, String> entry : staticFields.entrySet()) {
+        processedDataBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+    }
+
+
+    {"path": "{{ /request/path }}", "method": "{{ /request/method }}", "status": "{{ /response/status }}"}
