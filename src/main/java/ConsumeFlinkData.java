@@ -6,6 +6,7 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.LinkedOptionalMap.KeyValue;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +32,7 @@ public class ConsumeFlinkData {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // flag
-        AtomicBoolean flag = new AtomicBoolean(false);
+        // AtomicBoolean flag = new AtomicBoolean(false);
 
         // GET CONSUMER PROPS FROM RESOURCES/CONSUME.PROPS
         Properties consumerProps = new Properties();
@@ -49,31 +50,27 @@ public class ConsumeFlinkData {
         DataStream<String> userDataStream = env
                 .fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "userdata_source");
 
-        
         // // for file based template
         // String keyField;
         // List<String> fields = new ArrayList<>();
         // Map<String, String> staticFields;
         // try (FileInputStream fis = new FileInputStream("api_template.json")) {
-        //     ObjectMapper objectMapper = new ObjectMapper();
-        //     JsonNode jsonNode = objectMapper.readTree(fis);
-        //     keyField = jsonNode.get("key").asText();
-        //     JsonNode fieldsNode = jsonNode.get("fields");
-        //     if (fieldsNode.isArray()) {
-        //         Iterator<JsonNode> iterator = fieldsNode.elements();
-        //         while (iterator.hasNext()) {
-        //             JsonNode fieldNode = iterator.next();
-        //             fields.add(fieldNode.asText());
-        //         }
-        //     }
-
-        //     JsonNode staticFieldsNode = jsonNode.get("staticFields");
-        //     staticFields = objectMapper.convertValue(staticFieldsNode, Map.class);
+        // ObjectMapper objectMapper = new ObjectMapper();
+        // JsonNode jsonNode = objectMapper.readTree(fis);
+        // keyField = jsonNode.get("key").asText();
+        // JsonNode fieldsNode = jsonNode.get("fields");
+        // if (fieldsNode.isArray()) {
+        // Iterator<JsonNode> iterator = fieldsNode.elements();
+        // while (iterator.hasNext()) {
+        // JsonNode fieldNode = iterator.next();
+        // fields.add(fieldNode.asText());
+        // }
         // }
 
+        // JsonNode staticFieldsNode = jsonNode.get("staticFields");
+        // staticFields = objectMapper.convertValue(staticFieldsNode, Map.class);
+        // }
 
-
-                
         // ASK THE VALUES
         String keyField;
         Scanner input = new Scanner(System.in);
@@ -85,7 +82,7 @@ public class ConsumeFlinkData {
         // PROCESS KEY TEMPLATE
         Pattern keyPattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
         Matcher keyMatcher = keyPattern.matcher(Key);
-        
+
         if (keyMatcher.find()) {
             keyField = keyMatcher.group(1);
         } else {
@@ -103,7 +100,7 @@ public class ConsumeFlinkData {
 
         // System.out.println(keyField);
         // for(String fieldPath : fields){
-        //     System.out.println(fieldPath);
+        // System.out.println(fieldPath);
         // }
 
         // TOPICS TO PRODUCE MESSAGES INTO
@@ -148,33 +145,41 @@ public class ConsumeFlinkData {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(rawData);
 
+            int flag = 0;
+
             JsonNode keyValue = jsonNode.at(keyField);
 
             // Process data according to the template
             StringBuilder processedDataBuilder = new StringBuilder();
-            if (keyValue !=null && !keyValue.isMissingNode()){
-            processedDataBuilder.append("Key : ").append(keyValue).append("\nValues : {");
+            int keyStartIndex = processedDataBuilder.length();
+            if (keyValue != null && !keyValue.isMissingNode() && flag == 0) {
+                processedDataBuilder.append("Key : ").append(keyValue).append("\nValues : {");
+            } else {
+                processedDataBuilder.append("\"" + "ERROR" + " \"").append(": \"" + "KEY MISSING" + " \" \n")
+                        .append(rawData);
+                flag = 1;
             }
-            else{
-                processedDataBuilder.append("Key : ").append("MISSING").append("\nValues : {");
-                flag.set(true); 
-            }
-            // Process dynamic fields   
-            for (String fieldPath : fields) {
-                String fieldName = fieldPath.substring(fieldPath.lastIndexOf("/") + 1);
-                JsonNode fieldValue = jsonNode.at(fieldPath);
-                if (fieldValue != null && !fieldValue.isMissingNode()) {
-                    processedDataBuilder.append(" \"" + fieldName + " \"").append(": ").append(" \"" + fieldValue.asText() + " \"");
-                } else {
-                    // Handle missing field value
-                    processedDataBuilder.append(" \"" + fieldName + " \"").append(": ").append("\"" + "MISSING" + " \"");
-                    flag.set(true); 
+            // Process dynamic fields
+            if (flag == 0) {
+                for (String fieldPath : fields) {
+                    String fieldName = fieldPath.substring(fieldPath.lastIndexOf("/") + 1);
+                    JsonNode fieldValue = jsonNode.at(fieldPath);
+                    if (fieldValue != null && !fieldValue.isMissingNode() && flag == 0) {
+                        processedDataBuilder.append(" \"" + fieldName + " \"").append(": ")
+                                .append(" \"" + fieldValue.asText() + " \"");
+                    } else {
+                        processedDataBuilder.delete(keyStartIndex, processedDataBuilder.length());  
+                        // Handle missing field value
+                        processedDataBuilder.append("\"" + "ERROR" + " \"").append(": \"" + "VALUES MISSING" + " \" \n")
+                                .append(rawData);
+                        flag = 1;
+                    }
+
                 }
-                
             }
             processedDataBuilder.append("}");
             return processedDataBuilder.toString();
-            
+
         });
 
         // SEND THE DATA TO THE TOPIC
@@ -184,8 +189,8 @@ public class ConsumeFlinkData {
                 .filter(data -> !data.contains("MISSING"))
                 .sinkTo(processedDataSink);
 
-
-        // SENDS THE DATA TO MISSING-DATA TOPIC(PROVIDED ANY ONE OF FIELDS DOESN'T EXISTS)
+        // SENDS THE DATA TO MISSING-DATA TOPIC(PROVIDED ANY ONE OF FIELDS DOESN'T
+        // EXISTS)
         processedDataStream
                 .filter(data -> data.contains("MISSING"))
                 .sinkTo(missingDataSink);
@@ -196,4 +201,3 @@ public class ConsumeFlinkData {
         env.execute();
     }
 }
-
