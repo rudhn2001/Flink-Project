@@ -152,8 +152,13 @@ public class ConsumeFlinkData {
 
             // Process data according to the template
             StringBuilder processedDataBuilder = new StringBuilder();
-
+            if (keyValue !=null && !keyValue.isMissingNode()){
             processedDataBuilder.append("Key : ").append(keyValue).append("\nValues : {");
+            }
+            else{
+                processedDataBuilder.append("Key : ").append("MISSING").append("\nValues : {");
+                flag.set(true); 
+            }
             // Process dynamic fields   
             for (String fieldPath : fields) {
                 String fieldName = fieldPath.substring(fieldPath.lastIndexOf("/") + 1);

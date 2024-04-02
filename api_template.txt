@@ -2,7 +2,7 @@ Key - '{{/response/status}}'
 Value  '{"specversion": "1.0", "source": "{{/client/ip}}", "request": "{{/request}}", "response": "{{/response}}"}'
 
 Key - '{{/client/ip}}'
-Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "status": "{{/response/status}}", "apples": "{{/response/apples}}"}'
+Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}'
 
 {"path": "{{ request.path }}", "method": "{{ request.method }}", "status": "{{ response.status }}"}
 
