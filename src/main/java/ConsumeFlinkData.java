@@ -152,10 +152,11 @@ public class ConsumeFlinkData {
             // Process data according to the template
             StringBuilder processedDataBuilder = new StringBuilder();
             int keyStartIndex = processedDataBuilder.length();
+            String keyName = keyField.substring(keyField.lastIndexOf("/") + 1);
             if (keyValue != null && !keyValue.isMissingNode() && flag == 0) {
                 processedDataBuilder.append("Key : ").append(keyValue).append("\nValues : {");
             } else {
-                processedDataBuilder.append("\"" + "ERROR" + " \"").append(": \"" + "KEY MISSING" + " \" \n")
+                processedDataBuilder.append("\"" + "ERROR" + " \" ").append(": \"" +keyName+ " MISSING" + " \" \n")
                         .append(rawData);
                 flag = 1;
             }
@@ -170,7 +171,7 @@ public class ConsumeFlinkData {
                     } else {
                         processedDataBuilder.delete(keyStartIndex, processedDataBuilder.length());  
                         // Handle missing field value
-                        processedDataBuilder.append("\"" + "ERROR" + " \"").append(": \"" + "VALUES MISSING" + " \" \n")
+                        processedDataBuilder.append("\"" + "ERROR" + " \"").append(": \"" +fieldName+ " MISSING" + " \" \n")
                                 .append(rawData);
                         flag = 1;
                     }
