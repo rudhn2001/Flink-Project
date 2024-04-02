@@ -164,10 +164,10 @@ public class ConsumeFlinkData {
                 String fieldName = fieldPath.substring(fieldPath.lastIndexOf("/") + 1);
                 JsonNode fieldValue = jsonNode.at(fieldPath);
                 if (fieldValue != null && !fieldValue.isMissingNode()) {
-                    processedDataBuilder.append("\"" + fieldName + "\"").append(": ").append("\"" + fieldValue.asText() + "\"");
+                    processedDataBuilder.append(" \"" + fieldName + " \"").append(": ").append(" \"" + fieldValue.asText() + " \"");
                 } else {
                     // Handle missing field value
-                    processedDataBuilder.append("\"" + fieldName + "\"").append(": ").append("\"" + "MISSING" + "\"");
+                    processedDataBuilder.append(" \"" + fieldName + " \"").append(": ").append("\"" + "MISSING" + " \"");
                     flag.set(true); 
                 }
                 

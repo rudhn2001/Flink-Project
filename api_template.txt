@@ -4,7 +4,7 @@ Value  '{"specversion": "1.0", "source": "{{/client/ip}}", "request": "{{/reques
 Key - '{{/client/ip}}'
 Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}'
 
-{"path": "{{ request.path }}", "method": "{{ request.method }}", "status": "{{ response.status }}"}
 
-Key - '{{/client/ip}}'
-Value - '{"path": "{{request/path}}", "method": "{{request/method}}", "status": "{{response/status}}"}'
+
+Key - {{/response/status}}
+Value - {"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}
