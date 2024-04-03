@@ -166,8 +166,13 @@ public class ConsumeFlinkData {
                     String fieldName = fieldPath.substring(fieldPath.lastIndexOf("/") + 1);
                     JsonNode fieldValue = jsonNode.at(fieldPath);
                     if (fieldValue != null && !fieldValue.isMissingNode() && flag == 0) {
-                        processedDataBuilder.append(" \"" + fieldName + " \"").append(": ")
-                                .append(" \"" + fieldValue.asText() + " \"");
+                        if (fieldValue.isObject()) {
+                            processedDataBuilder.append(" \"" + fieldName + " \"").append(": ")
+                                                .append(fieldValue.toString()); // Append JSON structure as is
+                        } else {
+                            processedDataBuilder.append(" \"" + fieldName + " \"").append(": ")
+                                                .append(" \"" + fieldValue.asText() + " \"");
+                        }
                     } else {
                         processedDataBuilder.delete(keyStartIndex, processedDataBuilder.length());  
                         // Handle missing field value

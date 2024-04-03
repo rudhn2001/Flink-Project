@@ -1,5 +1,5 @@
-Key - '{{/response/status}}'
-Value  '{"specversion": "1.0", "source": "{{/client/ip}}", "request": "{{/request}}", "response": "{{/response}}"}'
+Key - {{/response/status}}
+Value  {"specversion": "1.0", "source": "{{/client/ip}}", "request": "{{/request}}", "response": "{{/response}}"}
 
 Key - '{{/client/ip}}'
 Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}'
