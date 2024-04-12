@@ -74,6 +74,24 @@
         </dependency>
 
 
+        <!-- for flink table -->
+        <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge</artifactId>
+            <version>1.19.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+
+
         <!--for apache-->
 
         <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
@@ -215,6 +233,12 @@
     <groupId>org.scala-lang</groupId>
     <artifactId>scala-library</artifactId>
     <version>2.13.0</version>
+  </dependency>
+
+  <dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-table-api-scala-bridge_2.12</artifactId>
+    <version>1.19.0</version>
   </dependency>
 </dependencies>
 

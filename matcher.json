@@ -1,0 +1,13 @@
+AND CASE ALL PROPER
+{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}
+
+AND CASE 2 MATCHERS STATUS AND CLIENT PROPER
+{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"},{"field": "client.ip","operator": "=","value": "192.168.32.1"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}
+
+
+AND CASE 2 MATCHERS STATUS WRONG AND CLIENT PROPER
+{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "404"},{"field": "client.ip","operator": "=","value": "192.168.32.1"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}
+
+
+OR CASE 2 MATCHERS STATUS WRONG AND CLIENT PROPER
+{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "201"},{"field": "client.ip","operator": "=","value": "192.168.32.1"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "OR", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}

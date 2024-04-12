@@ -8,3 +8,6 @@ Value - '{"path": "{{/request/path}}", "method": "{{/request/method}}", "client 
 
 Key - {{/response/status}}
 Value - {"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}
+
+Key - {{response.status}}
+Value - {"path": "{{request.path}}", "method": "{{request.method}}", "client ip": "{{client.ip}}"}
