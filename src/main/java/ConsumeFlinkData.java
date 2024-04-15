@@ -9,13 +9,19 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import com.fasterxml.jackson.core.JsonParser;
 // PARSING THE JSON
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
+import org.json.JSONObject;
+// import com.google.gson.JsonParser;
 import scala.collection.mutable.StringBuilder;
+
+import static org.mockito.Answers.values;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -39,6 +45,7 @@ public class ConsumeFlinkData {
                 String keyField;
                 List<String> fields = new ArrayList<>();
                 List<String> staticFields = new ArrayList<>();
+                List<String> staticValues = new ArrayList<>();
 
                 // TOPICS TO PRODUCE MESSAGES INTO
 
@@ -65,12 +72,27 @@ public class ConsumeFlinkData {
                 // ASK THE VALUES
 
                 Scanner input = new Scanner(System.in);
-                System.out.println("Enter the Key template : ");
-                String Key = input.nextLine();
-                System.out.println("Enter the Value template : ");
-                String Value = input.nextLine();
+                // System.out.println("Enter the Key template : ");
+                // String Key = input.nextLine();
+                // System.out.println("Enter the Value template : ");
+                // String Value = input.nextLine();
                 // System.out.println("Enter the event processor in JSON : ");
                 // String matcherString = input.nextLine();
+
+                // FOR PROCESSING DATA, TAKES RAW DATA AND FILTERS USING THE TEMPLATES
+
+                // READ AND PARSE MATCHERS.JSON
+                GetMatchers matchers = new GetMatchers();
+                // IF READING FROM INPUT
+                System.out.println("Enter the Event Processor template : ");
+                String Matchers = input.nextLine();
+                matchers.CheckCondition(Matchers);
+
+                JSONObject eventProcessorJson = new JSONObject(Matchers);
+
+                JSONObject ruleObject = eventProcessorJson.getJSONArray("rules").getJSONObject(0);
+                String Key = ruleObject.getString("key_template");
+                String Value = ruleObject.getString("value_template");
 
                 // PROCESS KEY TEMPLATE
                 Pattern keyPattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
@@ -90,8 +112,25 @@ public class ConsumeFlinkData {
                 while (valueMatcher.find()) {
                         String valuePath = valueMatcher.group(1).replace(".", "/");
                         String valueField = "/" + valuePath;
+                        valueField = valueField.replaceAll("\\s", "");
                         fields.add(valueField);
                 }
+
+                JSONObject valueTemplateJson = new JSONObject(Value);
+                for (String staticField : valueTemplateJson.keySet()) {
+                        String value = valueTemplateJson.getString(staticField);
+                        if (!(valueTemplateJson.getString(staticField).matches("\\{\\{.*?\\}\\}"))) {
+                                staticFields.add(staticField);
+                                if (!value.matches("\\{\\{.*?\\}\\}")) {
+                                        staticValues.add(value);
+                                }
+                        }
+                }
+
+                System.out.println(" KEY : " + Key + "\n");
+                System.out.println(" value : " + fields + "\n");
+                System.out.println(" static fields : " + staticFields + "\n");
+                System.out.println(" staticvalue : " + staticValues + "\n");
 
                 // ------- CREATE STREAM ENVIRONMENT AND TABLE SOURCE -------------
 
@@ -137,16 +176,6 @@ public class ConsumeFlinkData {
                                 .setKafkaProducerConfig(producerProps)
                                 .setRecordSerializer(processedDataSchema)
                                 .build();
-
-                // FOR PROCESSING DATA, TAKES RAW DATA AND FILTERS USING THE TEMPLATES
-
-                // READ AND PARSE MATCHERS.JSON
-                GetMatchers matchers = new GetMatchers();
-                // IF READING FROM INPUT
-                System.out.println("Enter the Event Processor template : ");
-                String Matchers = input.nextLine();
-                matchers.CheckCondition(Matchers);
-
 
                 // ------------- CONVERT STREAM TO TABLE AND ADD INTO NEW ROW ----------------
 
@@ -199,8 +228,10 @@ public class ConsumeFlinkData {
                                                                 .append(rawData);
                                                 flag = 1;
                                         }
+
                                         // Process dynamic fields
                                         if (flag == 0) {
+                                                String missingFieldName = null;
                                                 for (String fieldPath : fields) {
                                                         String fieldName = fieldPath
                                                                         .substring(fieldPath.lastIndexOf("/") + 1);
@@ -227,26 +258,35 @@ public class ConsumeFlinkData {
                                                                                                         + " \"");
                                                                 }
                                                         } else {
-                                                                processedDataBuilder.delete(keyStartIndex,
-                                                                                processedDataBuilder.length());
+                                                                processedDataBuilder.delete(keyStartIndex, processedDataBuilder.length());
+                                                                missingFieldName = fieldPath;
+                                                                missingFieldName = missingFieldName.replaceAll("/", ".");
                                                                 // Handle missing field value
                                                                 processedDataBuilder.append("\"" + "ERROR" + " \"")
-                                                                                .append(": \"" + fieldName + " MISSING"
+                                                                                .append(": \"" + missingFieldName + " MISSING"
                                                                                                 + " \" \n")
                                                                                 .append(rawData);
                                                                 flag = 1;
+                                                                break;
                                                         }
 
                                                 }
 
-
+                                                for (int i = 0; i < staticFields.size(); i++) {
+                                                        processedDataBuilder.append(" \"" + staticFields.get(i) + "\" : \""
+                                                                        + staticValues.get(i) + "\"");
+                                                        if (i < staticFields.size() - 1) {
+                                                                processedDataBuilder.append(", ");
+                                                        }
+                                                }
                                         }
                                         processedDataBuilder.append("}");
+
                                         return processedDataBuilder.toString();
 
                                 });
 
-// ------- SENDING DATA TO THE TOPIC -------------
+                // ------- SENDING DATA TO THE TOPIC -------------
 
                 // SENDS THE DATA TO REQUESTED-DATA TOPIC(PROVIDED ALL FIELDS EXISTS)
                 processedDataStream
@@ -259,7 +299,7 @@ public class ConsumeFlinkData {
                                 .filter(data -> data.contains("MISSING"))
                                 .sinkTo(missingDataSink);
 
-// ------------- PRINT IN LOG LIST ----------------
+                // ------------- PRINT IN LOG LIST ----------------
                 resultStream.print();
                 // userDataStream.print();
 
