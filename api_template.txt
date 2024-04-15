@@ -10,4 +10,4 @@ Key - {{/response/status}}
 Value - {"path": "{{/request/path}}", "method": "{{/request/method}}", "client ip": "{{/client/ip}}"}
 
 Key - {{response.status}}
-Value - {"path": "{{request.path}}", "method": "{{request.method}}", "client ip": "{{client.ip}}"}
+Value - {"specversion": "1.0", "path": "{{request.path}}", "method": "{{request.method}}", "client ip": "{{client.ip}}"}
