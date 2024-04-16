@@ -9,34 +9,35 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import com.fasterxml.jackson.core.JsonParser;
+import scala.collection.mutable.StringBuilder;
+
 // PARSING THE JSON
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
+import org.json.JSONObject;
 
+// flink table
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
-import org.json.JSONObject;
-// import com.google.gson.JsonParser;
-import scala.collection.mutable.StringBuilder;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
-import static org.mockito.Answers.values;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Properties;
-import java.util.Scanner;
+
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ConsumeFlinkData {
+        protected static final Logger logger = LogManager.getLogger(ConsumeFlinkData.class);
 
         public static void main(String[] args) throws Exception {
 
@@ -69,23 +70,13 @@ public class ConsumeFlinkData {
                         consumerProps.load(stream);
                 }
 
-                // ASK THE VALUES
-
-                Scanner input = new Scanner(System.in);
-                // System.out.println("Enter the Key template : ");
-                // String Key = input.nextLine();
-                // System.out.println("Enter the Value template : ");
-                // String Value = input.nextLine();
-                // System.out.println("Enter the event processor in JSON : ");
-                // String matcherString = input.nextLine();
 
                 // FOR PROCESSING DATA, TAKES RAW DATA AND FILTERS USING THE TEMPLATES
 
-                // READ AND PARSE MATCHERS.JSON
+                // // READ AND PARSE MATCHERS.JSON
                 GetMatchers matchers = new GetMatchers();
-                // IF READING FROM INPUT
-                System.out.println("Enter the Event Processor template : ");
-                String Matchers = input.nextLine();
+
+                String Matchers = args[0];
                 matchers.CheckCondition(Matchers);
 
                 JSONObject eventProcessorJson = new JSONObject(Matchers);
@@ -127,10 +118,11 @@ public class ConsumeFlinkData {
                         }
                 }
 
-                System.out.println(" KEY : " + Key + "\n");
-                System.out.println(" value : " + fields + "\n");
-                System.out.println(" static fields : " + staticFields + "\n");
-                System.out.println(" staticvalue : " + staticValues + "\n");
+                // System.out.println(" KEY : " + Key + "\n");
+                // System.out.println(" value : " + fields + "\n");
+                // System.out.println(" static fields : " + staticFields + "\n");
+                // System.out.println(" staticvalue : " + staticValues + "\n");
+                logger.info("Hello world");
 
                 // ------- CREATE STREAM ENVIRONMENT AND TABLE SOURCE -------------
 
