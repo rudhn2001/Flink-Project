@@ -1,8 +1,0 @@
-1. Create topics for producing and consuming, two topics.   (done)
-2. Start producing the custom JSON data in 1 topics.    (done)
-3. Run the flink job to produce the data and observe through flink.     (done)
-4. Run the flink sink in order to fetch the producing topic data in the log list.   (done)
-5. Fetch the log list data and then produce that data in another resultant topic.   (done)
-6. Change the input from custom input to the sample API input.  (done)
-7. before producing data to result topic, fetch the api log from log list and process it so that only the data according to sample input is fetched.    (done)
-8. produce in resultant topic. (done)

@@ -1,0 +1,76 @@
+version: '3.3'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka-server:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-server
+    ports:
+      - "9092:9092"
+    expose:
+      - "29092"
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-server:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    depends_on:
+      - zookeeper
+  create-topics:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-topics
+    depends_on:
+      - kafka-server
+    entrypoint: /bin/sh
+    command: >
+      -c "kafka-topics --create --topic requested-data --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka-server:29092;
+          kafka-topics --create --topic missing-data --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka-server:29092;
+          kafka-topics --create --topic log-data --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka-server:29092;"
+  jobmanager:
+    image: flink:latest
+    expose:
+      - "6123"
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+
+  taskmanager:
+    image: flink:latest
+    expose:
+      - "6121"
+      - "6122"
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    links:
+      - "jobmanager:jobmanager"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+
+  flink-job:
+    container_name: flink-job
+    depends_on:
+      - jobmanager
+    volumes:
+      - ./:/usr/local/flink-job
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      - KAFKA_SERVER=kafka-server:9092
+      - TOPICS=log-data,requested-data,missing-data
+      # - JSON_ARGUMENT='{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]]}'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      flink run --jobmanager jobmanager:8081 -c ConsumeFlinkData /usr/local/flink-job/target/events-1.0-SNAPSHOT.jar '{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}' 

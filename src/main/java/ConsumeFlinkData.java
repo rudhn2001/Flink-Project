@@ -54,7 +54,7 @@ public class ConsumeFlinkData {
                 // PRODUCER PROPS
 
                 Properties producerProps = new Properties();
-                producerProps.setProperty("bootstrap.servers", "localhost:9092");
+                producerProps.setProperty("bootstrap.servers", "kafka-server:29092");
                 producerProps.setProperty("acks", "1");
                 producerProps.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
                 producerProps.setProperty("value.serializer",
