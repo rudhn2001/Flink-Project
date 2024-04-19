@@ -58,7 +58,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>DataGeneratorJob</mainClass>
+                  <mainClass>ConsumeFlinkData</mainClass>
                 </transformer>
               </transformers>
             </configuration>

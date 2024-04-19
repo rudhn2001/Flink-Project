@@ -12,5 +12,5 @@ FROM flink:latest
 
 WORKDIR /usr/local/flink-job
 
-
-COPY --from=builder /usr/local/flink-job/target/events-1.0-SNAPSHOT.jar .
+COPY --from=builder /usr/local/flink-job/ .
+# Set the default command to run the Flink job

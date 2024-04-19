@@ -67,10 +67,9 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
       - KAFKA_SERVER=kafka-server:9092
-      - TOPICS=log-data,requested-data,missing-data
-      # - JSON_ARGUMENT='{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]]}'
+      # - TOPICS=log-data,requested-data,missing-data
     build:
       context: .
       dockerfile: Dockerfile
     command: >
-      flink run --jobmanager jobmanager:8081 -c ConsumeFlinkData /usr/local/flink-job/target/events-1.0-SNAPSHOT.jar '{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}' 
+      flink run --jobmanager jobmanager:8081 -c ConsumeFlinkData /usr/local/flink-job/target/events-1.0-SNAPSHOT.jar '{"name": "orders","api_source": "a2b603c4-21fb-41eb-9e1d-b5b204a20f6b","api": "58b00d1c-fca2-4b24-8c39-0999b6412d55","output_encoding": "JSON","rules": [{"matchers": [{"field": "response.status","operator": "=","value": "200"}], "key_template": "{{request.path}}", "value_template": "{\"specversion\": \"1.0\", \"action\": \"place-order\", \"source\": \"{{ client.ip }}\", \"request\": \"{{ request }}\", \"response\": \"{{ response }}\"}", "combinator": "AND", "stream": "7ce267f9-91c7-4eb7-9af7-fd174cd60331"}]}' "log-data" "requested-data" "missing-data"

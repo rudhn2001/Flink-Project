@@ -47,9 +47,12 @@ public class ConsumeFlinkData {
 
                 // TOPICS TO PRODUCE MESSAGES INTO
 
-                String producerTopic = "log-data";
-                String processedTopic = "requested-data";
-                String fallBackTopic = "missing-data";
+                // String producerTopic = "log-data";
+                // String processedTopic = "requested-data";
+                // String fallBackTopic = "missing-data";
+                String producerTopic = args[1];
+                String processedTopic = args[2];
+                String fallBackTopic = args[3];
 
                 // PRODUCER PROPS
 
@@ -74,6 +77,7 @@ public class ConsumeFlinkData {
                 GetMatchers matchers = new GetMatchers();
 
                 String Matchers = args[0];
+
                 matchers.CheckCondition(Matchers);
 
                 JSONObject eventProcessorJson = new JSONObject(Matchers);
