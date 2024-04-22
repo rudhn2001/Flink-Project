@@ -133,7 +133,7 @@ public class ConsumeFlinkData {
                 // ------------- KAFKA SOURCE BUILD ----------------
 
                 KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
-                                .setProperties(consumerProps)
+                                .setProperties(producerProps)
                                 .setTopics(producerTopic)
                                 .setStartingOffsets(OffsetsInitializer.latest())
                                 .setValueOnlyDeserializer(new SimpleStringSchema())
